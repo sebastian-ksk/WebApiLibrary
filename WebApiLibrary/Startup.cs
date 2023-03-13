@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
+using System.Text.Json.Serialization;
 
 namespace WebApiLibrary
 {
@@ -9,15 +10,16 @@ namespace WebApiLibrary
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
-    
+
         }
         public IConfiguration Configuration { get; }
 
-        public void ConfigurationServices (IServiceCollection services)
+        public void ConfigurationServices(IServiceCollection services)
         {
-            services.AddControllers();
-           
-            services.AddDbContext<ApplicationDbContext> (options=>options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
+            services.AddControllers().AddJsonOptions(
+                x=>x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+
+            services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("defaultConnection")));
 
             services.AddSwaggerGen(c =>
             {

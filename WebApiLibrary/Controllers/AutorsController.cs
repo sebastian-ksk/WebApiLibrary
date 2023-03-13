@@ -6,7 +6,7 @@ namespace WebApiLibrary.Controllers
 {
     [ApiController]
     [Route("api/autores")]
-    public class AutorsController: ControllerBase
+    public class AutorsController : ControllerBase
     {
 
         private readonly ApplicationDbContext context;
@@ -16,9 +16,9 @@ namespace WebApiLibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult <List<Autor>>> Get()
+        public async Task<ActionResult<List<Autor>>> Get()
         {
-            return await context.Autors.ToListAsync();
+            return await context.Autors.Include(x=>x.Books).ToListAsync();
         }
 
         [HttpPost]
@@ -40,7 +40,7 @@ namespace WebApiLibrary.Controllers
 
             context.Update(autor);
             await context.SaveChangesAsync();
-        
+
             return Ok();
 
         }
@@ -49,7 +49,8 @@ namespace WebApiLibrary.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             var exist = await context.Autors.AnyAsync(x => x.Id == id);
-            if (!exist) { 
+            if (!exist)
+            {
                 return NotFound("El usario no existe");
             }
 
