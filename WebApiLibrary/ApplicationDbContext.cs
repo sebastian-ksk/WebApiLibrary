@@ -11,5 +11,6 @@ namespace WebApiLibrary
         }
 
         public DbSet<Autor> Autors { get; set; }
+        public DbSet<Book> Books { get; set; }
     }
 }

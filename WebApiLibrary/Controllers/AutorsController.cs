@@ -5,8 +5,8 @@ using WebApiLibrary.Entities;
 namespace WebApiLibrary.Controllers
 {
     [ApiController]
-    [Route("api/autores")]
-    public class AutorsController: ControllerBase
+    [Route("api/autores")] //Ruta de controlador
+    public class AutorsController : ControllerBase
     {
 
         private readonly ApplicationDbContext context;
@@ -16,13 +16,55 @@ namespace WebApiLibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult <List<Autor>>> Get()
+        [HttpGet("list")] //doble ruta
+        public async Task<ActionResult<List<Autor>>> Get()
         {
-            return await context.Autors.ToListAsync();
+            return await context.Autors.Include(x=>x.Books).ToListAsync();
+        }
+
+        [HttpGet("first")] //concatena first
+        public async Task<ActionResult<Autor>> GetFirst([FromQuery] string dataValidate)
+        {
+            var author= await context.Autors.Include(x => x.Books).FirstOrDefaultAsync();
+            if (author== null)
+            {
+                return BadRequest();
+            }
+            return Ok(author);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Book>> GetById(int id)
+        {
+            var author = await context.Autors.Include(x => x.Books).FirstOrDefaultAsync(x => x.Id == id);
+
+            if (author == null)
+            {
+                return NotFound("libro no encontrado");
+            }
+
+
+            return Ok(author);
+        }
+
+
+        [HttpGet("{name:string}/{lastname?}")]
+        public async Task<ActionResult<Book>> GetByName(string name, string lastname)
+        {
+            var author = await context.Autors.Include(x => x.Books).FirstOrDefaultAsync(predicate: x => x.Name.Contains(name));
+
+            if (author == null )
+            {
+                return NotFound("Author no encontrado");
+            }
+           
+
+
+            return Ok(author);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post(Autor autor)
+        public async Task<ActionResult> Post([FromBody] Autor autor)
         {
             context.Add(autor);
             await context.SaveChangesAsync();
@@ -40,7 +82,7 @@ namespace WebApiLibrary.Controllers
 
             context.Update(autor);
             await context.SaveChangesAsync();
-        
+
             return Ok();
 
         }
@@ -49,7 +91,8 @@ namespace WebApiLibrary.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             var exist = await context.Autors.AnyAsync(x => x.Id == id);
-            if (!exist) { 
+            if (!exist)
+            {
                 return NotFound("El usario no existe");
             }
 
