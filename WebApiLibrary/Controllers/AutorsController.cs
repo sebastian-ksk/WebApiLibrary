@@ -29,6 +29,34 @@ namespace WebApiLibrary.Controllers
             return Ok();
         }
 
+        [HttpPut("{id:int}")]
+
+        public async Task<ActionResult> Put(Autor autor, int id)
+        {
+            if (autor.Id != id)
+            {
+                return BadRequest("el id no coincide");
+            }
+
+            context.Update(autor);
+            await context.SaveChangesAsync();
+        
+            return Ok();
+
+        }
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult> Delete(int id)
+        {
+            var exist = await context.Autors.AnyAsync(x => x.Id == id);
+            if (!exist) { 
+                return NotFound("El usario no existe");
+            }
+
+            context.Remove(new Autor() { Id = id });
+            await context.SaveChangesAsync();
+            return Ok();
+        }
 
     }
 
