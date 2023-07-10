@@ -21,8 +21,22 @@ namespace WebApiLibrary.Controllers
             return await context.Autors.Include(x=>x.Books).ToListAsync();
         }
 
+     
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Autor>> Get(int id)
+        {
+            var autor = await context.Autors.FirstOrDefaultAsync(x => x.Id == id);
+            
+            if (autor == null)
+            {
+                return NotFound();
+            }
+
+            return autor;
+        }
+
         [HttpPost]
-        public async Task<ActionResult> Post(Autor autor)
+        public async Task<ActionResult> Post([FromBody]Autor autor)
         {
             context.Add(autor);
             await context.SaveChangesAsync();
