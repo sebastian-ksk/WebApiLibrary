@@ -5,7 +5,7 @@ using WebApiLibrary.Entities;
 namespace WebApiLibrary.Controllers
 {
     [ApiController]
-    [Route("api/autores")]
+    [Route("api/autores")] //Ruta de controlador
     public class AutorsController : ControllerBase
     {
 
@@ -16,27 +16,55 @@ namespace WebApiLibrary.Controllers
         }
 
         [HttpGet]
+        [HttpGet("list")] //doble ruta
         public async Task<ActionResult<List<Autor>>> Get()
         {
             return await context.Autors.Include(x=>x.Books).ToListAsync();
         }
 
-     
-        [HttpGet("{id:int}")]
-        public async Task<ActionResult<Autor>> Get(int id)
+        [HttpGet("first")] //concatena first
+        public async Task<ActionResult<Autor>> GetFirst([FromQuery] string dataValidate)
         {
-            var autor = await context.Autors.FirstOrDefaultAsync(x => x.Id == id);
-            
-            if (autor == null)
+            var author= await context.Autors.Include(x => x.Books).FirstOrDefaultAsync();
+            if (author== null)
             {
-                return NotFound();
+                return BadRequest();
+            }
+            return Ok(author);
+        }
+
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Book>> GetById(int id)
+        {
+            var author = await context.Autors.Include(x => x.Books).FirstOrDefaultAsync(x => x.Id == id);
+
+            if (author == null)
+            {
+                return NotFound("libro no encontrado");
             }
 
-            return autor;
+
+            return Ok(author);
+        }
+
+
+        [HttpGet("{name:string}/{lastname?}")]
+        public async Task<ActionResult<Book>> GetByName(string name, string lastname)
+        {
+            var author = await context.Autors.Include(x => x.Books).FirstOrDefaultAsync(predicate: x => x.Name.Contains(name));
+
+            if (author == null )
+            {
+                return NotFound("Author no encontrado");
+            }
+           
+
+
+            return Ok(author);
         }
 
         [HttpPost]
-        public async Task<ActionResult> Post([FromBody]Autor autor)
+        public async Task<ActionResult> Post([FromBody] Autor autor)
         {
             context.Add(autor);
             await context.SaveChangesAsync();
